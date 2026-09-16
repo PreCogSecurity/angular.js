@@ -5,8 +5,14 @@ set -e
 export BROWSER_STACK_ACCESS_KEY=`echo $BROWSER_STACK_ACCESS_KEY | rev`
 export SAUCE_ACCESS_KEY=`echo $SAUCE_ACCESS_KEY | rev`
 
+# Run lint checks (jshint, jscs) and static analysis on every job so style
+# violations cannot merge silently even when the ci-checks matrix job is
+# skipped or restructured.
+grunt ci-checks
+
 if [ $JOB = "ci-checks" ]; then
-  grunt ci-checks
+  # ci-checks-only: lint was the only task needed
+  :
 elif [ $JOB = "unit" ]; then
   if [ "$BROWSER_PROVIDER" == "browserstack" ]; then
     BROWSERS="BS_Chrome,BS_Safari,BS_Firefox,BS_IE_9,BS_IE_10,BS_IE_11,BS_iOS"

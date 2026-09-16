@@ -81,7 +81,8 @@ module.exports = function(grunt) {
       jquery: 'karma-jquery.conf.js',
       'jquery-2.1': 'karma-jquery-2.1.conf.js',
       docs: 'karma-docs.conf.js',
-      modules: 'karma-modules.conf.js'
+      modules: 'karma-modules.conf.js',
+      local: 'karma-local.conf.js'
     },
 
 

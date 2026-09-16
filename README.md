@@ -2,8 +2,8 @@ AngularJS [![Build Status](https://travis-ci.org/angular/angular.js.svg?branch=m
 =========
 
 AngularJS lets you write client-side web applications as if you had a smarter browser.  It lets you
-use good old HTML (or HAML, Jade and friends!) as your template language and lets you extend HTML’s
-syntax to express your application’s components clearly and succinctly.  It automatically
+use good old HTML (or HAML, Jade and friends!) as your template language and lets you extend HTML's
+syntax to express your application's components clearly and succinctly.  It automatically
 synchronizes data from your UI (view) with your JavaScript objects (model) through 2-way data
 binding. To help you structure your application better and make it easy to test, AngularJS teaches
 the browser how to do dependency injection and inversion of control.
@@ -21,6 +21,12 @@ piece of cake. Best of all? It makes development fun!
 
 ##### Looking for Angular 2 (beta)? Go here: https://github.com/angular/angular
 
+Prerequisites
+---------
+* **Node.js < 5** — this project targets the Node 4.x LTS line. A `.nvmrc` file is included; run `nvm use` if you use nvm.
+* **npm ~2.5** — bundled with the recommended Node version.
+* **Google Chrome** — required for the local headless test runner (`karma-local.conf.js`).
+
 Building AngularJS
 ---------
 [Once you have set up your environment](https://docs.angularjs.org/misc/contribute), just run:
@@ -30,14 +36,37 @@ Building AngularJS
 
 Running tests
 -------------
-To execute all unit tests, use:
+### Local tests (no external services required)
 
-    grunt test:unit
+Run the full jQLite unit test suite in a headless local Chrome with a single command:
 
-To execute end-to-end (e2e) tests, use:
+    npm run test:local
+
+This uses `karma-local.conf.js` which does **not** need SauceLabs or BrowserStack credentials.
+
+### Cross-browser tests (CI)
+
+The cross-browser suite requires remote browser provider credentials. Copy the example
+environment file and fill in the values you need:
+
+    cp .env.example .env
+
+See `.env.example` for the full list of variables (`BROWSER_PROVIDER`, `SAUCE_USERNAME`,
+`SAUCE_ACCESS_KEY`, `BROWSER_STACK_USERNAME`, `BROWSER_STACK_ACCESS_KEY`). These are only
+needed for the Travis CI matrix jobs; local development and `npm run test:local` do not
+use them.
+
+### End-to-end tests
 
     grunt package
     grunt test:e2e
+
+### Docker (zero-install)
+
+Run the browser-free CI checks (lint, style, static analysis) and the Promises/A+ test
+suite in an isolated container — no local Node, Chrome, or credentials required:
+
+    docker-compose up
 
 To learn more about the grunt tasks, run `grunt --help`
 
@@ -59,7 +88,7 @@ MVC, short for Model-View-Controller, is a design pattern, i.e. how the code sho
 Unlike other frameworks in any programming language, where MVC, the three separate components, each one has to be written and then connected by the programmer, AngularJS helps the programmer by asking him/her to just create these and everything else will be taken care of by AngularJS.
 
 #### Interconnection with HTML at the root level
-AngularJS uses HTML to define the user's interface. AngularJS also enables the programmer to write new HTML tags (AngularJS Directives) and increase the readability and understandability of the HTML code. Directives are AngularJS’s way of bringing additional functionality to HTML. Directives achieve this by enabling us to invent our own HTML elements. This also helps in making the code DRY (Don't Repeat Yourself), which means once created, a new directive can be used anywhere within the application.
+AngularJS uses HTML to define the user's interface. AngularJS also enables the programmer to write new HTML tags (AngularJS Directives) and increase the readability and understandability of the HTML code. Directives are AngularJS's way of bringing additional functionality to HTML. Directives achieve this by enabling us to invent our own HTML elements. This also helps in making the code DRY (Don't Repeat Yourself), which means once created, a new directive can be used anywhere within the application.
 
 #### Data Handling made simple
 Data and Data Models in AngularJS are plain JavaScript objects and one can add and change properties directly on it and loop over objects and arrays at will.
