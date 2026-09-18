@@ -1,0 +1,16 @@
+# One-command startup for the browser-free CI checks and Promises/A+ test suite.
+#
+# Usage:
+#   docker-compose up
+#
+# This brings up the AngularJS test environment in an isolated container that
+# requires no Chrome, SauceLabs, or BrowserStack credentials. It runs
+# jshint + jscs + ddescribe-iit + merge-conflict checks followed by the
+# Promises/A+ compliance tests.
+#
+# For local browser-based tests (requires Chrome on the host):
+#   npm run test:local
+
+angularjs:
+  build: .
+  command: sh -c "grunt ci-checks && grunt test:promises-aplus"

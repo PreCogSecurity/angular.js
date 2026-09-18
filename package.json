@@ -18,7 +18,10 @@
     "postinstall": "node scripts/npm/copy-npm-shrinkwrap.js",
     "commit": "git-cz",
     "test-i18n": "jasmine-node i18n/spec",
-    "test-i18n-ucd": "jasmine-node i18n/ucd/spec"
+    "test-i18n-ucd": "jasmine-node i18n/ucd/spec",
+    "test:local": "grunt tests:local",
+    "verify-lockfile": "node scripts/npm/verify-lockfile.js",
+    "audit": "node scripts/npm/audit.js"
   },
   "devDependencies": {
     "angular-benchpress": "0.x.x",
@@ -41,7 +44,7 @@
     "grunt-contrib-copy": "~0.6.0",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-ddescribe-iit": "~0.0.1",
-    "grunt-jasmine-node": "git://github.com/vojtajina/grunt-jasmine-node.git#fix-grunt-exit-code",
+    "grunt-jasmine-node": "https://github.com/vojtajina/grunt-jasmine-node.git#fix-grunt-exit-code",
     "grunt-jscs": "^2.1.0",
     "grunt-merge-conflict": "~0.0.1",
     "grunt-shell": "~1.1.1",
