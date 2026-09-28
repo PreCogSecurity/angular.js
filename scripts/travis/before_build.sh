@@ -4,13 +4,9 @@ set -e
 
 mkdir -p $LOGS_DIR
 
-# Verify the lockfile (npm-shrinkwrap.json) is in sync with package.json.
-echo "Verifying lockfile..."
-node scripts/npm/verify-lockfile.js
-
-# Run a dependency audit (informational; does not fail the build).
-echo "Running dependency audit..."
-node scripts/npm/audit.js
+# The dependency and secret hygiene gates (verify-lockfile, security:check,
+# audit-ci) run as explicit, visible steps in .travis.yml so that a failure is
+# attributed to the right check. They are not repeated here.
 
 if [ $JOB != "ci-checks" ]; then
   echo "start_browser_provider"

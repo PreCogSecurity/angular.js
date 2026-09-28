@@ -23,3 +23,20 @@ npm-debug.log
 .vscode
 *.log
 *.stackdump
+
+# Local environment / secrets.
+# `.env.example` is the committed template; a real `.env` holds live
+# SauceLabs / BrowserStack credentials and must never be committed. CI keeps
+# these as Travis repository secrets (Settings -> Environment Variables).
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.keystore
+npm-shrinkwrap.local.json
+
+# Coverage / report output.
+coverage/
+/test_out/

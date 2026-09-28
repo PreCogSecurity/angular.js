@@ -27,6 +27,12 @@ Prerequisites
 * **npm ~2.5** — bundled with the recommended Node version.
 * **Google Chrome** — required for the local headless test runner (`karma-local.conf.js`).
 
+`package.json` pins the toolchain with `engines` + `engineStrict`, so `npm install`
+refuses to run on an unexpected Node version instead of failing later in an
+unreproducible way. Install the exact version the build expects:
+
+    nvm install && nvm use
+
 Building AngularJS
 ---------
 [Once you have set up your environment](https://docs.angularjs.org/misc/contribute), just run:
@@ -44,6 +50,22 @@ Run the full jQLite unit test suite in a headless local Chrome with a single com
 
 This uses `karma-local.conf.js` which does **not** need SauceLabs or BrowserStack credentials.
 
+### Verifying a fresh clone
+
+These are the checks CI runs, in the same order. A fresh clone should be able to
+run all of them with no credentials and no manual steps:
+
+    npm install                    # preinstall purges stale node_modules
+    npm run lint                   # merge-conflict + ddescribe-iit + jshint + jscs
+    npm run security:check         # no committed .env, no inlined credentials
+    npm run verify-lockfile        # package.json == npm-shrinkwrap.json
+    npm run audit-ci               # no high/critical advisory in prod dependencies
+    npm run test:local             # jQLite unit tests in headless Chrome
+
+`npm run audit` reports the full dependency tree (build tooling included) and is
+informational; only `npm run audit-ci` blocks, because everything under
+`dependencies/` ships to customers.
+
 ### Cross-browser tests (CI)
 
 The cross-browser suite requires remote browser provider credentials. Copy the example
@@ -51,10 +73,13 @@ environment file and fill in the values you need:
 
     cp .env.example .env
 
-See `.env.example` for the full list of variables (`BROWSER_PROVIDER`, `SAUCE_USERNAME`,
-`SAUCE_ACCESS_KEY`, `BROWSER_STACK_USERNAME`, `BROWSER_STACK_ACCESS_KEY`). These are only
-needed for the Travis CI matrix jobs; local development and `npm run test:local` do not
-use them.
+`.env` is git-ignored and must never be committed; CI injects the same variables
+from its own secret store. See `.env.example` for the full list of variables
+(`BROWSER_PROVIDER`, `BROWSER_PROVIDER_READY_FILE`, `USE_JQUERY`, `SAUCE_USERNAME`,
+`SAUCE_ACCESS_KEY`, `BROWSER_STACK_USERNAME`, `BROWSER_STACK_ACCESS_KEY`, `TRAVIS`,
+`TRAVIS_BUILD_ID`, `TRAVIS_BUILD_NUMBER`, `TRAVIS_JOB_NUMBER`, `BUILD_NUMBER`,
+`LOGS_DIR`). Every one of them is CI-only: local development, `npm run lint` and
+`npm run test:local` do not use them.
 
 ### End-to-end tests
 
@@ -63,12 +88,32 @@ use them.
 
 ### Docker (zero-install)
 
-Run the browser-free CI checks (lint, style, static analysis) and the Promises/A+ test
-suite in an isolated container — no local Node, Chrome, or credentials required:
+Run the browser-free CI checks (secret scan, lockfile check, lint, style, static
+analysis) and the Promises/A+ test suite in an isolated container — no local Node,
+Chrome, or credentials required:
 
     docker-compose up
 
 To learn more about the grunt tasks, run `grunt --help`
+
+### npm scripts
+
+| Script | What it does |
+|--------|--------------|
+| `npm run lint` | `grunt ci-checks`: merge-conflict, `ddescribe`/`iit`, `jshint`, `jscs` |
+| `npm run test:local` | jQLite unit tests in headless local Chrome |
+| `npm run test-i18n` | Jasmine specs for the i18n tooling |
+| `npm run test-i18n-ucd` | Jasmine specs for the CLDR extraction pipeline |
+| `npm run security:check` | Committed-secret scan (see [SECURITY.md](SECURITY.md)) |
+| `npm run verify-lockfile` | Fails if `package.json` and `npm-shrinkwrap.json` drifted apart |
+| `npm run audit` | Full-tree `npm audit`, informational |
+| `npm run audit-ci` | `npm audit --production`; blocks on high/critical advisories |
+
+## Security
+
+Report vulnerabilities privately — see [SECURITY.md](SECURITY.md) for the
+disclosure process, the list of security-critical source files, and the
+hardening expected of applications that render untrusted content.
 
 Contribute & Develop
 --------------------

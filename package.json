@@ -20,8 +20,11 @@
     "test-i18n": "jasmine-node i18n/spec",
     "test-i18n-ucd": "jasmine-node i18n/ucd/spec",
     "test:local": "grunt tests:local",
+    "lint": "grunt ci-checks",
+    "security:check": "node scripts/security/check-secrets.js",
     "verify-lockfile": "node scripts/npm/verify-lockfile.js",
-    "audit": "node scripts/npm/audit.js"
+    "audit": "node scripts/npm/audit.js",
+    "audit-ci": "node scripts/npm/audit.js --production"
   },
   "devDependencies": {
     "angular-benchpress": "0.x.x",

@@ -28,6 +28,18 @@
  *
  * @returns {string} Html-linkified and {@link $sanitize sanitized} text.
  *
+ * @security
+ *   Attribute names and values are entity-encoded before they are written into
+ *   the generated markup, and only own properties of `attributes` are copied,
+ *   so neither a crafted attribute value nor a polluted prototype can inject
+ *   markup. Anything not on {@link ngSanitize.$sanitize `$sanitize`}'s
+ *   whitelist (event handlers such as `onclick`, for example) is stripped from
+ *   the result.
+ *
+ *   When linking to `_blank`, pass `rel="noopener noreferrer"` through
+ *   `attributes` unless the opened document is fully trusted: without it the
+ *   target page gets a `window.opener` reference and can navigate this page.
+ *
  * @usage
    <span ng-bind-html="linky_expression | linky"></span>
  *
@@ -169,21 +181,33 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
     }
 
     function addLink(url, text) {
+      // Resolve the custom attributes for THIS url into a local variable.
+      // Assigning the result back to `attributes` would permanently replace a
+      // function-valued `attributes` with the value returned by its first
+      // invocation, silently dropping the custom attributes from every
+      // subsequent link in the same string.
+      var customAttrs = angular.isFunction(attributes) ? attributes(url) : attributes;
       var key;
+
+      if (!angular.isObject(customAttrs)) {
+        customAttrs = {};
+      }
+
       html.push('<a ');
-      if (angular.isFunction(attributes)) {
-        attributes = attributes(url);
+      for (key in customAttrs) {
+        // Own properties only: an inherited key (for example one planted on
+        // Object.prototype by a prototype-pollution bug elsewhere in the
+        // application) must never be serialized into the generated markup.
+        if (!Object.prototype.hasOwnProperty.call(customAttrs, key)) continue;
+        // Both the name and the value are entity-encoded. `$sanitize` already
+        // drops unsafe attributes, but escaping here means a value can never
+        // break out of the quoted attribute in the first place, so the filter
+        // does not depend solely on the sanitizer to be safe.
+        html.push(escapeAttr(key) + '="' + escapeAttr(customAttrs[key]) + '" ');
       }
-      if (angular.isObject(attributes)) {
-        for (key in attributes) {
-          html.push(key + '="' + attributes[key] + '" ');
-        }
-      } else {
-        attributes = {};
-      }
-      if (angular.isDefined(target) && !('target' in attributes)) {
+      if (angular.isDefined(target) && !('target' in customAttrs)) {
         html.push('target="',
-                  target,
+                  escapeAttr(target),
                   '" ');
       }
       html.push('href="',
@@ -191,6 +215,15 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
                 '">');
       addText(text);
       html.push('</a>');
+    }
+
+    /**
+     * Entity-encode a value that is spliced into the generated markup. The
+     * explicit string coercion matches the implicit coercion the filter used
+     * before, so non-string attribute values keep working.
+     */
+    function escapeAttr(value) {
+      return sanitizeText('' + value);
     }
   };
 }]);

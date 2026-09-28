@@ -3,3 +3,12 @@
 
 # JS files must always use LF for tools to work
 *.js eol=lf
+
+# Generated CLDR locale data (i18n/closure) is produced by i18n/ucd from the
+# Unicode Character Database. Marking it as generated/vendored keeps it out of
+# the hand-written source statistics and diffs, so real engineering effort is
+# measured against real engineering effort.
+i18n/closure/** linguist-generated=true
+i18n/closure/** linguist-vendored=true
+i18n/ucd/dist/** linguist-generated=true
+i18n/ucd/dist/** linguist-vendored=true

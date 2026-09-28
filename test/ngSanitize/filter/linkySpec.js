@@ -125,5 +125,64 @@ describe('linky', function() {
                   '<a href="http://example.com" target="_self" class="blue">http://example.com</a>',
                   '<a class="blue" href="http://example.com" target="_self">http://example.com</a>');
     });
+
+
+    it('should apply a custom attribute function to every link', function() {
+      // The resolved attribute map must not replace the function itself,
+      // otherwise every link after the first one loses its custom attributes.
+      expect(linky("http://a.com and http://b.com", null, function(url) {
+        return {"class": url === 'http://a.com' ? 'first' : 'second'};
+      })).
+        toBe('<a class="first" href="http://a.com">http://a.com</a> and ' +
+            '<a class="second" href="http://b.com">http://b.com</a>');
+    });
+
+
+    it('should call a custom attribute function once per link', function() {
+      var linkParameters = jasmine.createSpy('linkParameters').and.returnValue({});
+      linky("http://a.com and http://b.com", null, linkParameters);
+      expect(linkParameters.callCount).toBe(2);
+      expect(linkParameters).toHaveBeenCalledWith('http://a.com');
+      expect(linkParameters).toHaveBeenCalledWith('http://b.com');
+    });
+
+
+    it('should not serialize inherited attribute properties', function() {
+      // Guards against prototype pollution: a property planted on the
+      // prototype must never end up in the generated markup, even when the
+      // sanitizer would happily keep it.
+      var attributes = Object.create({class: 'polluted'});
+      attributes.rel = 'nofollow';
+
+      expect(linky('http://example.com', null, attributes)).toBeOneOf(
+        '<a rel="nofollow" href="http://example.com">http://example.com</a>',
+        '<a href="http://example.com" rel="nofollow">http://example.com</a>');
+    });
+
+
+    it('should not allow an attribute value to break out of the attribute', function() {
+      // The name and the value are entity-encoded before being spliced into
+      // the markup, so the `"` cannot terminate the `class` attribute and turn
+      // `onmouseover` into a real event handler attribute. The whole thing
+      // stays inside the quoted value of `class`.
+      expect(linky('http://example.com', '_blank', {
+        'class': 'x" onmouseover="alert(1)'
+      })).toBeOneOf(
+        '<a class="x&#34; onmouseover=&#34;alert(1)" target="_blank" ' +
+        'href="http://example.com">http://example.com</a>',
+        '<a target="_blank" class="x&#34; onmouseover=&#34;alert(1)" ' +
+        'href="http://example.com">http://example.com</a>',
+        '<a class="x&#34; onmouseover=&#34;alert(1)" href="http://example.com" ' +
+        'target="_blank">http://example.com</a>');
+    });
+
+
+    it('should not allow the target to break out of the attribute', function() {
+      expect(linky('http://example.com', '_blank" onload="alert(1)')).toBeOneOf(
+        '<a target="_blank&#34; onload=&#34;alert(1)" ' +
+        'href="http://example.com">http://example.com</a>',
+        '<a href="http://example.com" target="_blank&#34; onload=&#34;alert(1)">' +
+        'http://example.com</a>');
+    });
   });
 });
