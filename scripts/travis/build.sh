@@ -5,13 +5,17 @@ set -e
 export BROWSER_STACK_ACCESS_KEY=`echo $BROWSER_STACK_ACCESS_KEY | rev`
 export SAUCE_ACCESS_KEY=`echo $SAUCE_ACCESS_KEY | rev`
 
-# Run lint checks (jshint, jscs) and static analysis on every job so style
-# violations cannot merge silently even when the ci-checks matrix job is
-# skipped or restructured.
-grunt ci-checks
+# Lint / static analysis (`grunt ci-checks` = merge-conflict + ddescribe-iit +
+# jshint + jscs) is run as its own visible CI step in .travis.yml, together
+# with the lockfile, secret and dependency-audit gates, so that a lint failure
+# is attributed to lint and fails fast. Set RUN_LINT=1 to also run it from
+# here, which is what you want when invoking this script outside of Travis.
+if [ "$RUN_LINT" == "1" ]; then
+  npm run lint
+fi
 
 if [ $JOB = "ci-checks" ]; then
-  # ci-checks-only: lint was the only task needed
+  # ci-checks-only: lint and the hygiene gates were the only tasks needed
   :
 elif [ $JOB = "unit" ]; then
   if [ "$BROWSER_PROVIDER" == "browserstack" ]; then

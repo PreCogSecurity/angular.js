@@ -1,2 +1,8 @@
 node_modules/**
 lib/htmlparser/**
+
+# Generated CLDR data. Produced by i18n/ucd (gulp) from the Unicode Character
+# Database; it is tens of thousands of lines of machine generated locale tables
+# that are never hand-edited, so linting it produces noise and no signal.
+i18n/closure/**
+i18n/ucd/dist/**

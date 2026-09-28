@@ -1,16 +1,19 @@
-# One-command startup for the browser-free CI checks and Promises/A+ test suite.
+# One-command startup for the CI checks that need no browser and no credentials.
 #
 # Usage:
 #   docker-compose up
 #
 # This brings up the AngularJS test environment in an isolated container that
-# requires no Chrome, SauceLabs, or BrowserStack credentials. It runs
-# jshint + jscs + ddescribe-iit + merge-conflict checks followed by the
-# Promises/A+ compliance tests.
+# requires no Chrome, SauceLabs, or BrowserStack credentials. It runs, in order:
+#   1. the committed-secret scan
+#   2. the lockfile freshness check (package.json vs npm-shrinkwrap.json)
+#   3. jshint + jscs + ddescribe-iit + merge-conflict
+#   4. the Promises/A+ compliance tests
+# The first failing check aborts the container with a non-zero exit code.
 #
 # For local browser-based tests (requires Chrome on the host):
 #   npm run test:local
 
 angularjs:
   build: .
-  command: sh -c "grunt ci-checks && grunt test:promises-aplus"
+  command: sh -c "node scripts/security/check-secrets.js && node scripts/npm/verify-lockfile.js && grunt ci-checks && grunt test:promises-aplus"

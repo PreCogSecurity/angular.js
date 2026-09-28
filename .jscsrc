@@ -1,5 +1,5 @@
 {
-  "excludeFiles": ["src/ngLocale/**"],
+  "excludeFiles": ["src/ngLocale/**", "i18n/closure/**", "i18n/ucd/dist/**"],
   "disallowKeywords": ["with"],
   "disallowKeywordsOnNewLine": ["else"],
   "disallowMixedSpacesAndTabs": true,

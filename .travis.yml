@@ -54,6 +54,20 @@ before_script:
   - ./scripts/travis/before_build.sh
 
 script:
+  # 1) Static analysis gate. `grunt ci-checks` runs merge-conflict detection,
+  #    the ddescribe/iit check, `jshint` and `jscs`, and exits non-zero on any
+  #    violation, so a style or lint regression cannot merge. It is a separate,
+  #    visible step (rather than something buried inside build.sh) so that a
+  #    lint failure is reported as a lint failure and fails fast.
+  - npm run lint
+  # 2) Dependency hygiene and secret hygiene gates.
+  #    verify-lockfile: package.json and the committed npm-shrinkwrap.json agree.
+  #    security:check:  no committed `.env` and no inlined credentials.
+  #    audit-ci:        no high/critical advisory in a production dependency.
+  - npm run verify-lockfile
+  - npm run security:check
+  - npm run audit-ci
+  # 3) Job specific test tasks (JOB=ci-checks has nothing further to run).
   - ./scripts/travis/build.sh
 
 after_script:
